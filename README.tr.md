@@ -10,13 +10,14 @@ PHP8.1+, desteklenen Symfony6.4/7.4/8.1 ve PHP SDK0.29.5+ gerekir. Yerelde Symfo
 
 ## Kurulum
 
-**0.1.2 kaynak kodu hazırdır**; backend tarafından döndürülen ödeme sayfası adresleri için PHP SDK 0.29.5+ gerekir. [Packagist’te doğrulanan son sürüm](https://packagist.org/packages/lunixi/symfony-bundle) **0.1.1**’dir. 0.1.2 ve SDK bağımlılığı yayımlandıktan sonra güncel entegrasyonu şu komutla kurabilirsiniz:
+**0.1.2 [Packagist’te yayımlandı](https://packagist.org/packages/lunixi/symfony-bundle#0.1.2)**; backend tarafından döndürülen ödeme sayfası adresleri için PHP SDK 0.29.5+ kullanır. Güncel entegrasyonu şu komutla kurabilirsiniz:
 
 ```sh
-composer require lunixi/symfony-bundle:^0.1.2
+composer require "lunixi/symfony-bundle:^0.1.2"
 ```
 
-Yayımlanana kadar geliştirmede hazırlanan kaynak kodu ve açıkça tanımlanan yerel SDK kaynağını kullanın. 0.1.2’yi dağıtmadan önce [GitHub sürümlerini](https://github.com/Lunixi-Payment/lunixi-symfony/releases) ve Packagist’i kontrol edin; yayımlanmış sürümün normal kurulumu VCS tanımı gerektirmez.
+Composer yayımlanmış PHP SDK bağımlılığını çözer; normal kurulum VCS tanımı veya
+yerel SDK kaynağı gerektirmez. İnceleme için [v0.1.2 kaynak etiketi](https://github.com/Lunixi-Payment/lunixi-symfony/tree/v0.1.2) kullanılabilir.
 
 `config/bundles.php` içine `Lunixi\Symfony\LunixiBundle::class => ['all' => true]` ekleyin. `config/packages/lunixi.yaml`:
 

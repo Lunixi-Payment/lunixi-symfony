@@ -10,13 +10,14 @@ Requires PHP 8.1+, a supported Symfony 6.4/7.4/8.1 release and PHP SDK 0.29.5+. 
 
 ## Install
 
-**0.1.2 is prepared source**, requiring PHP SDK 0.29.5+ for backend-provided payment page URLs. The latest verified [Packagist](https://packagist.org/packages/lunixi/symfony-bundle) release is **0.1.1**. After 0.1.2 and its SDK dependency are published, install the updated integration with:
+**0.1.2 is published on [Packagist](https://packagist.org/packages/lunixi/symfony-bundle#0.1.2)** with PHP SDK 0.29.5+ for backend-provided payment page URLs. Install the updated integration with:
 
 ```sh
-composer require lunixi/symfony-bundle:^0.1.2
+composer require "lunixi/symfony-bundle:^0.1.2"
 ```
 
-Until publication, use the prepared source and an explicitly configured local SDK source for development. Check [GitHub releases](https://github.com/Lunixi-Payment/lunixi-symfony/releases) and Packagist before deploying 0.1.2; normal installation of a published release does not need a VCS override.
+Composer resolves the published PHP SDK dependency; normal installation needs no
+VCS override or local SDK source. The corresponding [v0.1.2 source tag](https://github.com/Lunixi-Payment/lunixi-symfony/tree/v0.1.2) remains available for review.
 
 Register the bundle in `config/bundles.php`:
 
