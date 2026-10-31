@@ -1,0 +1,53 @@
+{
+    "name": "lunixi/symfony-bundle",
+    "description": "Lunixi server-side payments and durable commerce services for Symfony",
+    "type": "symfony-bundle",
+    "license": "MIT",
+    "homepage": "https://github.com/Lunixi-Payment/lunixi-symfony",
+    "require": {
+        "php": ">=8.1",
+        "lunixi/php-sdk": "^0.29.3",
+        "symfony/framework-bundle": "^6.4 || ^7.4 || ^8.1",
+        "symfony/cache": "^6.4 || ^7.4 || ^8.1",
+        "symfony/console": "^6.4 || ^7.4 || ^8.1",
+        "doctrine/dbal": "^3.10 || ^4.4",
+        "psr/cache": "^2.0 || ^3.0"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^10.5 || ^11.0",
+        "symfony/browser-kit": "^6.4 || ^7.4 || ^8.1",
+        "symfony/security-csrf": "^6.4 || ^7.4 || ^8.1",
+        "symfony/yaml": "^6.4 || ^7.4 || ^8.1",
+        "phpstan/phpstan": "^2.1"
+    },
+    "autoload": {
+        "psr-4": {
+            "Lunixi\\Symfony\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Lunixi\\Symfony\\Tests\\": "tests/"
+        }
+    },
+    "scripts": {
+        "test": "phpunit",
+        "analyse": "phpstan analyse --no-progress"
+    },
+    "config": {
+        "sort-packages": true,
+        "allow-plugins": false
+    },
+    "archive": {
+        "exclude": [
+            "/vendor",
+            "/var",
+            "/dist",
+            "/composer.dev.json",
+            "/composer.dev.lock",
+            "/composer.lock",
+            "/.env",
+            "/.env.*"
+        ]
+    }
+}

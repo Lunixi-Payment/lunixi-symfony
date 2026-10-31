@@ -1,0 +1,10 @@
+/vendor/
+/build/
+/composer.lock
+/composer.dev.json
+/composer.dev.lock
+/.phpunit.cache/
+/var/
+/.env
+/.env.*
+/examples/demo/var/
