@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.1.2 — 2026-10-31
+
+- Require PHP SDK0.29.5: embedded checkout is the default; optional redirects use the backend paymentPageUrl with encrypted durable persistence and no token-to-URL reconstruction.
+
 ## 0.1.1 — 2026-10-31
 
 - Validate the configuration array root across Symfony 6.4/7.4/8.1 and detect SQLite through standard DBAL drivers across DBAL 3/4. Preserve original exceptions when a native callback already rolled back.

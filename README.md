@@ -6,17 +6,17 @@
 
 Inject the existing Lunixi PHP SDK into Symfony, or enable its durable checkout workflow on the same Doctrine connection as your orders. The bundle registers services and a schema command; your application owns routes, authentication, order permissions and fulfillment. No public payment endpoint is silently installed.
 
-Requires PHP 8.1+, a supported Symfony 6.4/7.4/8.1 release and PHP SDK 0.29.3+. Commerce needs a transactional Doctrine DBAL connection: MySQL/InnoDB, PostgreSQL or SQLite. The application must use the same connection for its order changes. Native local verification used Symfony 8.1.10, DBAL 4.5.0, PHP 8.4, SQLite and MariaDB; see [verification](docs/VERIFICATION.md).
+Requires PHP 8.1+, a supported Symfony 6.4/7.4/8.1 release and PHP SDK 0.29.5+. Commerce needs a transactional Doctrine DBAL connection: MySQL/InnoDB, PostgreSQL or SQLite. The application must use the same connection for its order changes. Native local verification used Symfony 8.1.10, DBAL 4.5.0, PHP 8.4, SQLite and MariaDB; see [verification](docs/VERIFICATION.md).
 
 ## Install
 
-Version **0.1.1** is published on [Packagist](https://packagist.org/packages/lunixi/symfony-bundle). Install it directly in your application:
+**0.1.2 is prepared source**, requiring PHP SDK 0.29.5+ for backend-provided payment page URLs. The latest verified [Packagist](https://packagist.org/packages/lunixi/symfony-bundle) release is **0.1.1**. After 0.1.2 and its SDK dependency are published, install the updated integration with:
 
 ```sh
-composer require lunixi/symfony-bundle:^0.1.1
+composer require lunixi/symfony-bundle:^0.1.2
 ```
 
-The [GitHub v0.1.1 source tag](https://github.com/Lunixi-Payment/lunixi-symfony/tree/v0.1.1) remains available for source installation and development; normal Composer installation does not need a VCS repository override.
+Until publication, use the prepared source and an explicitly configured local SDK source for development. Check [GitHub releases](https://github.com/Lunixi-Payment/lunixi-symfony/releases) and Packagist before deploying 0.1.2; normal installation of a published release does not need a VCS override.
 
 Register the bundle in `config/bundles.php`:
 
@@ -80,11 +80,11 @@ use Lunixi\Sdk\Commerce\{CheckoutService, Money, OrderSnapshot};
 use Lunixi\Symfony\MerchantContext;
 
 $order = new OrderSnapshot($merchant->merchantId(), 'order-1001', Money::minor('100.50'), 'TRY');
-$session = $checkout->start('order-1001', $order, 'https://shop.example/payment/return', true);
-// Send a no-store redirect to $session->hostedUrl() only to that order's owner.
+$session = $checkout->start('order-1001', $order, 'https://shop.example/payment/return');
+// Render browserConfig() with the official checkout bundle on the owned merchant page.
 ```
 
-The fourth argument selects hosted checkout at `pay.lunixi.com`. For embedded checkout use `false`, load the fixed `https://cdn.lunixi.com/lunixi-checkout.min.js`, provide `#lunixi-checkout-form`, pass the script-safe JSON from `$session->browserConfig()` to `Lunixi.checkout.create`, then call `checkout.mount('#lunixi-checkout-form')`. Preserve your application's CSP nonce and send `Cache-Control: private, no-store`. Do not render gateway HTML or collect PAN/CVV.
+Embedded checkout is the default: the Lunixi form opens on your own website. Load the fixed `https://cdn.lunixi.com/lunixi-checkout.min.js`, provide `#lunixi-checkout-form`, pass the script-safe JSON from `$session->browserConfig()` to `Lunixi.checkout.create`, then call `checkout.mount('#lunixi-checkout-form')`. Preserve your application's CSP nonce and send `Cache-Control: private, no-store`. Do not render gateway HTML or collect PAN/CVV. For an optional hosted flow, pass `true` as the fourth argument before creating the attempt and redirect to `$session->hostedUrl()`: this is the exact validated backend `paymentPageUrl`, encrypted with the attempt. Never construct it from the embedded token, which may have another origin binding. Missing legacy URLs require reconciliation; never rotate a key to get around them.
 
 Payment methods, installments and eligible split flows come from the merchant's Lunixi form configuration. They are not duplicated as Symfony switches. The fifth `start` argument enables preauthorization; `AUTHORIZED` holds an order and never fulfills it. `Money::exponent` and exact decimal conversion reject unsupported/native precision mismatches. Split functionality also requires gateway rollout and merchant eligibility.
 

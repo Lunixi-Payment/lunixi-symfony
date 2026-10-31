@@ -37,13 +37,14 @@ final class BundleTest extends TestCase
         [$checkout, $http, $db] = $this->boot();
         self::assertInstanceOf(CheckoutService::class, $checkout);
         self::assertInstanceOf(Connection::class, $db);
-        $http->respond(['data' => ['paymentId' => 'pi-1', 'token' => 'synthetic-token']]);
+        $http->respond(['data' => ['paymentId' => 'pi-1', 'token' => 'synthetic-token', 'paymentPageUrl' => 'https://pay.lunixi.com/payment/separate-backend-page-token']]);
         $order = new OrderSnapshot('merchant-1', 'order-1', 1000, 'TRY');
         $one = $checkout->start('order-1', $order, 'https://shop.example/return', true);
-        self::assertSame('https://pay.lunixi.com/payment/synthetic-token', $one->hostedUrl());
+        self::assertSame('https://pay.lunixi.com/payment/separate-backend-page-token', $one->hostedUrl());
         self::assertSame('pi-1', $checkout->start('order-1', $order, 'https://shop.example/return', true)->paymentId);
         self::assertCount(1, $http->calls);
         self::assertStringNotContainsString('synthetic-token', $db->fetchOne('SELECT payload FROM lunixi_attempts'));
+        self::assertStringNotContainsString('separate-backend-page-token', $db->fetchOne('SELECT payload FROM lunixi_attempts'));
         $body = json_decode($http->calls[0]['body'], true);
         self::assertSame('https://pay.lunixi.com', $body['metadata']['allowedOrigin']);
     }

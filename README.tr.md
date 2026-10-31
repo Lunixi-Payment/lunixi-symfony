@@ -6,17 +6,17 @@
 
 Mevcut PHP SDK’yı Symfony servislerine bağlar; isteğe bağlı kalıcı ödeme akışını siparişlerle aynı Doctrine bağlantısında çalıştırır. Rotalar, müşteri yetkisi, CSRF, sipariş/stok/fatura politikaları uygulamanıza aittir. Paket kendiliğinden herkese açık bir ödeme rotası oluşturmaz.
 
-PHP8.1+, desteklenen Symfony6.4/7.4/8.1 ve PHP SDK0.29.3+ gerekir. Yerelde Symfony8.1.10, DBAL4.5.0, PHP8.4, SQLite ve MariaDB doğrulandı. PostgreSQL yolu aynı DBAL sözleşmesini kullanır; yerel PostgreSQL kabulü çalıştırılmadı. [Doğrulama kaydı](docs/VERIFICATION.md) gerçek kapsamı açıklar.
+PHP8.1+, desteklenen Symfony6.4/7.4/8.1 ve PHP SDK0.29.5+ gerekir. Yerelde Symfony8.1.10, DBAL4.5.0, PHP8.4, SQLite ve MariaDB doğrulandı. PostgreSQL yolu aynı DBAL sözleşmesini kullanır; yerel PostgreSQL kabulü çalıştırılmadı. [Doğrulama kaydı](docs/VERIFICATION.md) gerçek kapsamı açıklar.
 
 ## Kurulum
 
-**0.1.1** sürümü [Packagist’te yayımlandı](https://packagist.org/packages/lunixi/symfony-bundle); ek VCS deposu tanımlamadan kurabilirsiniz:
+**0.1.2 kaynak kodu hazırdır**; backend tarafından döndürülen ödeme sayfası adresleri için PHP SDK 0.29.5+ gerekir. [Packagist’te doğrulanan son sürüm](https://packagist.org/packages/lunixi/symfony-bundle) **0.1.1**’dir. 0.1.2 ve SDK bağımlılığı yayımlandıktan sonra güncel entegrasyonu şu komutla kurabilirsiniz:
 
 ```sh
-composer require lunixi/symfony-bundle:^0.1.1
+composer require lunixi/symfony-bundle:^0.1.2
 ```
 
-[GitHub v0.1.1 kaynak etiketi](https://github.com/Lunixi-Payment/lunixi-symfony/tree/v0.1.1) alternatif kaynak kurulum ve geliştirme için kullanılabilir; normal Composer kurulumu VCS tanımı gerektirmez.
+Yayımlanana kadar geliştirmede hazırlanan kaynak kodu ve açıkça tanımlanan yerel SDK kaynağını kullanın. 0.1.2’yi dağıtmadan önce [GitHub sürümlerini](https://github.com/Lunixi-Payment/lunixi-symfony/releases) ve Packagist’i kontrol edin; yayımlanmış sürümün normal kurulumu VCS tanımı gerektirmez.
 
 `config/bundles.php` içine `Lunixi\Symfony\LunixiBundle::class => ['all' => true]` ekleyin. `config/packages/lunixi.yaml`:
 
@@ -46,10 +46,10 @@ $order = new Lunixi\Sdk\Commerce\OrderSnapshot(
     $merchant->merchantId(), 'order-1001',
     Lunixi\Sdk\Commerce\Money::minor('100.50'), 'TRY'
 );
-$session = $checkout->start('order-1001', $order, 'https://shop.example/payment/return', true);
+$session = $checkout->start('order-1001', $order, 'https://shop.example/payment/return');
 ```
 
-Dördüncü argüman `true` ise `pay.lunixi.com` formuna `$session->hostedUrl()` ile yönlendirin. `false` gömülü form içindir: sabit resmi checkout bundle’ını yükleyin, `#lunixi-checkout-form` oluşturun, `$session->browserConfig()` JSON’unu `Lunixi.checkout.create` ile kullanıp mount edin. CSP nonce’unu koruyun, token yanıtını `private, no-store` gönderin. PAN/CVV toplamaya veya gateway HTML’ini basmaya gerek yoktur. Yöntem ve taksitler Lunixi panelinden yönetilir; beşinci argüman provizyonu açar ve siparişi ödenmiş yapmaz.
+Varsayılan gömülü form kendi sitenizde açılır: sabit resmi checkout bundle’ını yükleyin, `#lunixi-checkout-form` oluşturun, `$session->browserConfig()` JSON’unu `Lunixi.checkout.create` ile kullanıp mount edin. CSP nonce’unu koruyun, token yanıtını `private, no-store` gönderin. PAN/CVV toplamayın veya gateway HTML’i basmayın. İsteğe bağlı yönlendirme için deneme oluşmadan dördüncü argümanı `true` seçin ve `$session->hostedUrl()` değerini kullanın. Bu, backend yanıtındaki doğrulanmış `paymentPageUrl` adresidir ve denemeyle şifreli saklanır; gömülü token’dan URL üretilmez. Eski kayıtta URL yoksa yeni anahtar/ödeme oluşturmayın; mutabakat yapın. Yöntem ve taksitler Lunixi panelinden yönetilir; beşinci argüman provizyonu açar ve siparişi ödenmiş yapmaz.
 
 Ham POST webhook’u `$merchant->verifyWebhook($request, $checkout)` ile doğrulayın; yalnız bu rotayı tarayıcı CSRF kontrolünden istisna tutun. İmzalı `data.orderId` sadece aday kaydı bulur. `$checkout->reconcile($orderKey, $applyNativeOrder, $event)` sunucudan ödeme sorgular; üye işyeri, ödeme/sipariş kimliği, para birimi ve tahsilat sayaçlarını eşleştirir. Çoklu kartta tek bacak yeterli değildir; tamamlanmış ana ödeme toplamı gerekir. Tarayıcı dönüşü hiçbir zaman ödeme kanıtı değildir.
 
