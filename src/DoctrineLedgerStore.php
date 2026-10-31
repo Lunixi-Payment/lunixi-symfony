@@ -5,7 +5,6 @@ namespace Lunixi\Symfony;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Platforms\AbstractMySQLPlatform;
 use Doctrine\DBAL\Platforms\PostgreSQLPlatform;
-use Doctrine\DBAL\Platforms\SQLitePlatform;
 use Lunixi\Sdk\Commerce\LedgerStore;
 
 /** Keeps DBAL/ORM transaction nesting aware of the shared order/inbox transaction. */
@@ -19,7 +18,10 @@ final class DoctrineLedgerStore implements LedgerStore
     {
         if (!preg_match('/^[a-zA-Z_][a-zA-Z0-9_]{0,45}$/D', $prefix)) { throw new \InvalidArgumentException('Invalid ledger table prefix.'); }
         $platform = $db->getDatabasePlatform();
-        $this->dialect = $platform instanceof AbstractMySQLPlatform ? 'mysql' : ($platform instanceof PostgreSQLPlatform ? 'pgsql' : ($platform instanceof SQLitePlatform ? 'sqlite' : ''));
+        // DBAL 3 uses SqlitePlatform; DBAL 4 renamed it SQLitePlatform.
+        // Standard SQLite drivers identify both without a nonexistent class reference.
+        $sqlite = in_array($db->getParams()['driver'] ?? '', ['pdo_sqlite', 'sqlite3'], true);
+        $this->dialect = $platform instanceof AbstractMySQLPlatform ? 'mysql' : ($platform instanceof PostgreSQLPlatform ? 'pgsql' : ($sqlite ? 'sqlite' : ''));
         if ($this->dialect === '') { throw new \InvalidArgumentException('Use MySQL/InnoDB, PostgreSQL or SQLite for the commerce ledger.'); }
         if ($this->dialect === 'sqlite') { $db->executeStatement('PRAGMA busy_timeout = 10000'); }
     }
@@ -44,7 +46,7 @@ final class DoctrineLedgerStore implements LedgerStore
             if ($this->dialect !== 'sqlite') { $this->db->fetchOne('SELECT order_key FROM ' . $this->prefix . 'attempts WHERE order_key = ? FOR UPDATE', [$orderKey]); }
             $result = $operation(); $this->db->commit(); return $result;
         } catch (\Throwable $error) {
-            try { if ($this->db->getTransactionNestingLevel() > 0) { $this->db->rollBack(); } } catch (\Throwable $ignored) { /* Preserve the original operation failure. */ }
+            try { $this->db->rollBack(); } catch (\Throwable $ignored) { /* A native callback may already have rolled back. Preserve its original failure. */ }
             throw $error;
         } finally { $this->active = false; $this->activeKey = ''; }
     }

@@ -15,23 +15,30 @@ use Symfony\Component\HttpKernel\Bundle\AbstractBundle;
 
 final class LunixiBundle extends AbstractBundle
 {
+    private static function arrayRoot(object $node): \Symfony\Component\Config\Definition\Builder\ArrayNodeDefinition
+    {
+        if (!$node instanceof \Symfony\Component\Config\Definition\Builder\ArrayNodeDefinition) { throw new \LogicException('Lunixi configuration requires an array root.'); }
+        return $node;
+    }
     public function configure(DefinitionConfigurator $definition): void
     {
-        $definition->rootNode()->children()
-            ->scalarNode('base_url')->defaultValue('https://api-gateway.lunixi.com')->end()
-            ->arrayNode('allowed_origins')->scalarPrototype()->end()->defaultValue(['https://api-gateway.lunixi.com'])->end()
-            ->scalarNode('key_id')->isRequired()->cannotBeEmpty()->end()
-            ->scalarNode('private_key')->isRequired()->cannotBeEmpty()->end()
-            ->integerNode('timeout')->min(1)->max(120)->defaultValue(30)->end()
-            ->scalarNode('cache_pool')->defaultValue('cache.app')->end()
-            ->scalarNode('http_client_service')->defaultNull()->end()
-            ->booleanNode('commerce_enabled')->defaultFalse()->end()
-            ->scalarNode('connection_service')->defaultValue('doctrine.dbal.default_connection')->end()
-            ->scalarNode('table_prefix')->defaultValue('lunixi_')->end()
-            ->scalarNode('merchant_id')->defaultValue('')->end()
-            ->scalarNode('webhook_secret')->defaultValue('')->end()
-            ->scalarNode('storage_key')->defaultValue('')->end()
-        ->end();
+        $root = self::arrayRoot($definition->rootNode());
+        $children = $root->children();
+        $children->scalarNode('base_url')->defaultValue('https://api-gateway.lunixi.com');
+        $origins = $children->arrayNode('allowed_origins');
+        $origins->scalarPrototype();
+        $origins->defaultValue(['https://api-gateway.lunixi.com']);
+        $children->scalarNode('key_id')->isRequired()->cannotBeEmpty();
+        $children->scalarNode('private_key')->isRequired()->cannotBeEmpty();
+        $children->integerNode('timeout')->min(1)->max(120)->defaultValue(30);
+        $children->scalarNode('cache_pool')->defaultValue('cache.app');
+        $children->scalarNode('http_client_service')->defaultNull();
+        $children->booleanNode('commerce_enabled')->defaultFalse();
+        $children->scalarNode('connection_service')->defaultValue('doctrine.dbal.default_connection');
+        $children->scalarNode('table_prefix')->defaultValue('lunixi_');
+        $children->scalarNode('merchant_id')->defaultValue('');
+        $children->scalarNode('webhook_secret')->defaultValue('');
+        $children->scalarNode('storage_key')->defaultValue('');
     }
     /** @param array<string,mixed> $config */
     public function loadExtension(array $config, ContainerConfigurator $container, ContainerBuilder $builder): void

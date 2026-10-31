@@ -10,7 +10,7 @@ Requires PHP 8.1+, a supported Symfony 6.4/7.4/8.1 release and PHP SDK 0.29.3+. 
 
 ## Install
 
-Version 0.1.0 is distributed from GitHub source. A GitHub tag is not a Packagist publication. In your application:
+Version 0.1.1 is distributed from GitHub source. A GitHub tag is not a Packagist publication. In your application:
 
 ```sh
 composer config repositories.lunixi-symfony vcs https://github.com/Lunixi-Payment/lunixi-symfony

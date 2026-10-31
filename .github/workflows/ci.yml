@@ -48,4 +48,4 @@ jobs:
           LUNIXI_TEST_DB_FILE: /tmp/lunixi-ci-db.json
       - run: vendor/bin/phpstan analyse --no-progress
       - run: composer audit --locked
-      - run: composer archive --format=zip --dir=dist --file=lunixi-symfony-0.1.0
+      - run: composer archive --format=zip --dir=dist --file=lunixi-symfony-0.1.1

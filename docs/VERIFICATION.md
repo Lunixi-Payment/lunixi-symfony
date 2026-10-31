@@ -1,4 +1,4 @@
-# Verification — 0.1.0
+# Verification — 0.1.1
 
 Local verification on 2026-10-31 used PHP8.4.1, Symfony8.1.10 and Doctrine DBAL4.5.0. No real gateway credentials or funds were used.
 
