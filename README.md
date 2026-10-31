@@ -10,13 +10,13 @@ Requires PHP 8.1+, a supported Symfony 6.4/7.4/8.1 release and PHP SDK 0.29.3+. 
 
 ## Install
 
-Version 0.1.1 is distributed from GitHub source. A GitHub tag is not a Packagist publication. In your application:
+Version **0.1.1** is published on [Packagist](https://packagist.org/packages/lunixi/symfony-bundle). Install it directly in your application:
 
 ```sh
-composer config repositories.lunixi-symfony vcs https://github.com/Lunixi-Payment/lunixi-symfony
-composer config repositories.lunixi-sdk vcs https://github.com/Lunixi-Payment/lunixi-php
-composer require lunixi/symfony-bundle:^0.1
+composer require lunixi/symfony-bundle:^0.1.1
 ```
+
+The [GitHub v0.1.1 source tag](https://github.com/Lunixi-Payment/lunixi-symfony/tree/v0.1.1) remains available for source installation and development; normal Composer installation does not need a VCS repository override.
 
 Register the bundle in `config/bundles.php`:
 

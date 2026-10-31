@@ -10,13 +10,13 @@ PHP8.1+, desteklenen Symfony6.4/7.4/8.1 ve PHP SDK0.29.3+ gerekir. Yerelde Symfo
 
 ## Kurulum
 
-Paket GitHub kaynak etiketiyle dağıtılır; Packagist yayını yapılmış olduğu varsayılmaz:
+**0.1.1** sürümü [Packagist’te yayımlandı](https://packagist.org/packages/lunixi/symfony-bundle); ek VCS deposu tanımlamadan kurabilirsiniz:
 
 ```sh
-composer config repositories.lunixi-symfony vcs https://github.com/Lunixi-Payment/lunixi-symfony
-composer config repositories.lunixi-sdk vcs https://github.com/Lunixi-Payment/lunixi-php
-composer require lunixi/symfony-bundle:^0.1
+composer require lunixi/symfony-bundle:^0.1.1
 ```
+
+[GitHub v0.1.1 kaynak etiketi](https://github.com/Lunixi-Payment/lunixi-symfony/tree/v0.1.1) alternatif kaynak kurulum ve geliştirme için kullanılabilir; normal Composer kurulumu VCS tanımı gerektirmez.
 
 `config/bundles.php` içine `Lunixi\Symfony\LunixiBundle::class => ['all' => true]` ekleyin. `config/packages/lunixi.yaml`:
 
