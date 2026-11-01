@@ -10,7 +10,7 @@ PHP8.1+, desteklenen Symfony6.4/7.4/8.1 ve PHP SDK ^1.0.1 gerekir. Yerelde Symfo
 
 ## Kurulum
 
-1.0.0 ve PHP SDK 1.0.1 [Packagist](https://packagist.org/packages/lunixi/symfony-bundle) üzerinde kullanılabilir olduğunda aşağıdaki komutla kurun. Kanonik string para sözleşmesi için [geçiş rehberini](MIGRATION-1.0.md) uygulayın:
+[1.0.0 sürümü](https://packagist.org/packages/lunixi/symfony-bundle) ve [PHP SDK 1.0.1 bağımlılığı](https://packagist.org/packages/lunixi/php-sdk) Packagist üzerinde yayımlandı; aşağıdaki komutla kurun. Kanonik string para sözleşmesi için [geçiş rehberini](MIGRATION-1.0.md) uygulayın:
 
 ```sh
 composer require "lunixi/symfony-bundle:^1.0"

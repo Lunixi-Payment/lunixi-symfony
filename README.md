@@ -12,7 +12,7 @@ Requires PHP 8.1+, a supported Symfony 6.4/7.4/8.1 release and PHP SDK ^1.0.1. C
 
 ## Install
 
-Install version **1.0.0** after it and PHP SDK 1.0.1 are available on [Packagist](https://packagist.org/packages/lunixi/symfony-bundle):
+Install published version **1.0.0** from [Packagist](https://packagist.org/packages/lunixi/symfony-bundle); its [PHP SDK 1.0.1 dependency](https://packagist.org/packages/lunixi/php-sdk) is also published:
 
 ```sh
 composer require "lunixi/symfony-bundle:^1.0"
