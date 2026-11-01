@@ -1,5 +1,7 @@
 # Verification — 0.1.1
 
+**Historical verification record:** the package versions and results below describe the named 0.x release and are preserved unchanged.
+
 Local verification on 2026-10-31 used PHP8.4.1, Symfony8.1.10 and Doctrine DBAL4.5.0. No real gateway credentials or funds were used.
 
 - 9 tests / 35 assertions passed with the native Symfony kernel, SQLite and an isolated real MariaDB database. No tests were skipped in that run.
