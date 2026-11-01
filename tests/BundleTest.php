@@ -38,7 +38,7 @@ final class BundleTest extends TestCase
         self::assertInstanceOf(CheckoutService::class, $checkout);
         self::assertInstanceOf(Connection::class, $db);
         $http->respond(['data' => ['paymentId' => 'pi-1', 'token' => 'synthetic-token', 'paymentPageUrl' => 'https://pay.lunixi.com/payment/separate-backend-page-token']]);
-        $order = new OrderSnapshot('merchant-1', 'order-1', 1000, 'TRY');
+        $order = new OrderSnapshot('merchant-1', 'order-1', '1000', 'TRY');
         $one = $checkout->start('order-1', $order, 'https://shop.example/return', true);
         self::assertSame('https://pay.lunixi.com/payment/separate-backend-page-token', $one->hostedUrl());
         self::assertSame('pi-1', $checkout->start('order-1', $order, 'https://shop.example/return', true)->paymentId);

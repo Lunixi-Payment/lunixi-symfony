@@ -6,18 +6,18 @@
 
 Mevcut PHP SDK’yı Symfony servislerine bağlar; isteğe bağlı kalıcı ödeme akışını siparişlerle aynı Doctrine bağlantısında çalıştırır. Rotalar, müşteri yetkisi, CSRF, sipariş/stok/fatura politikaları uygulamanıza aittir. Paket kendiliğinden herkese açık bir ödeme rotası oluşturmaz.
 
-PHP8.1+, desteklenen Symfony6.4/7.4/8.1 ve PHP SDK0.29.5+ gerekir. Yerelde Symfony8.1.10, DBAL4.5.0, PHP8.4, SQLite ve MariaDB doğrulandı. PostgreSQL yolu aynı DBAL sözleşmesini kullanır; yerel PostgreSQL kabulü çalıştırılmadı. [Doğrulama kaydı](docs/VERIFICATION.md) gerçek kapsamı açıklar.
+PHP8.1+, desteklenen Symfony6.4/7.4/8.1 ve PHP SDK ^1.0.1 gerekir. Yerelde Symfony8.1.10, DBAL4.5.0, PHP8.4, SQLite ve MariaDB doğrulandı. PostgreSQL yolu aynı DBAL sözleşmesini kullanır; yerel PostgreSQL kabulü çalıştırılmadı. [Doğrulama kaydı](docs/VERIFICATION.md) gerçek kapsamı açıklar.
 
 ## Kurulum
 
-**0.1.2 [Packagist’te yayımlandı](https://packagist.org/packages/lunixi/symfony-bundle#0.1.2)**; backend tarafından döndürülen ödeme sayfası adresleri için PHP SDK 0.29.5+ kullanır. Güncel entegrasyonu şu komutla kurabilirsiniz:
+1.0.0 ve PHP SDK 1.0.1 [Packagist](https://packagist.org/packages/lunixi/symfony-bundle) üzerinde kullanılabilir olduğunda aşağıdaki komutla kurun. Kanonik string para sözleşmesi için [geçiş rehberini](MIGRATION-1.0.md) uygulayın:
 
 ```sh
-composer require "lunixi/symfony-bundle:^0.1.2"
+composer require "lunixi/symfony-bundle:^1.0"
 ```
 
 Composer yayımlanmış PHP SDK bağımlılığını çözer; normal kurulum VCS tanımı veya
-yerel SDK kaynağı gerektirmez. İnceleme için [v0.1.2 kaynak etiketi](https://github.com/Lunixi-Payment/lunixi-symfony/tree/v0.1.2) kullanılabilir.
+yerel SDK kaynağı gerektirmez. İnceleme için [v1.0.0 kaynak etiketi](https://github.com/Lunixi-Payment/lunixi-symfony/tree/v1.0.0) kullanılabilir.
 
 `config/bundles.php` içine `Lunixi\Symfony\LunixiBundle::class => ['all' => true]` ekleyin. `config/packages/lunixi.yaml`:
 
@@ -45,7 +45,7 @@ Dağıtım sırasında `php bin/console lunixi:ledger:install` çalıştırın. 
 ```php
 $order = new Lunixi\Sdk\Commerce\OrderSnapshot(
     $merchant->merchantId(), 'order-1001',
-    Lunixi\Sdk\Commerce\Money::minor('100.50'), 'TRY'
+    Lunixi\Sdk\Commerce\Money::minor('100.50', 2), 'TRY'
 );
 $session = $checkout->start('order-1001', $order, 'https://shop.example/payment/return');
 ```

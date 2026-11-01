@@ -1,23 +1,25 @@
 <p align="center"><a href="https://lunixi.com"><img src="https://raw.githubusercontent.com/Lunixi-Payment/lunixi-symfony/main/.github/assets/lunixi-logo.svg" alt="Lunixi" height="64"></a></p>
 
+> Version 1.0.0 changes all money to canonical minor-unit strings. Read [the migration guide](MIGRATION-1.0.md).
+
 # Lunixi Symfony Bundle
 
 [![CI](https://github.com/Lunixi-Payment/lunixi-symfony/actions/workflows/ci.yml/badge.svg)](https://github.com/Lunixi-Payment/lunixi-symfony/actions/workflows/ci.yml) · [Türkçe](README.tr.md) · [Documentation](https://docs.lunixi.com/sdks/symfony) · [MIT](LICENSE)
 
 Inject the existing Lunixi PHP SDK into Symfony, or enable its durable checkout workflow on the same Doctrine connection as your orders. The bundle registers services and a schema command; your application owns routes, authentication, order permissions and fulfillment. No public payment endpoint is silently installed.
 
-Requires PHP 8.1+, a supported Symfony 6.4/7.4/8.1 release and PHP SDK 0.29.5+. Commerce needs a transactional Doctrine DBAL connection: MySQL/InnoDB, PostgreSQL or SQLite. The application must use the same connection for its order changes. Native local verification used Symfony 8.1.10, DBAL 4.5.0, PHP 8.4, SQLite and MariaDB; see [verification](docs/VERIFICATION.md).
+Requires PHP 8.1+, a supported Symfony 6.4/7.4/8.1 release and PHP SDK ^1.0.1. Commerce needs a transactional Doctrine DBAL connection: MySQL/InnoDB, PostgreSQL or SQLite. The application must use the same connection for its order changes. Native local verification used Symfony 8.1.10, DBAL 4.5.0, PHP 8.4, SQLite and MariaDB; see [verification](docs/VERIFICATION.md).
 
 ## Install
 
-**0.1.2 is published on [Packagist](https://packagist.org/packages/lunixi/symfony-bundle#0.1.2)** with PHP SDK 0.29.5+ for backend-provided payment page URLs. Install the updated integration with:
+Install version **1.0.0** after it and PHP SDK 1.0.1 are available on [Packagist](https://packagist.org/packages/lunixi/symfony-bundle):
 
 ```sh
-composer require "lunixi/symfony-bundle:^0.1.2"
+composer require "lunixi/symfony-bundle:^1.0"
 ```
 
 Composer resolves the published PHP SDK dependency; normal installation needs no
-VCS override or local SDK source. The corresponding [v0.1.2 source tag](https://github.com/Lunixi-Payment/lunixi-symfony/tree/v0.1.2) remains available for review.
+VCS override or local SDK source. The corresponding [v1.0.0 source tag](https://github.com/Lunixi-Payment/lunixi-symfony/tree/v1.0.0) remains available for review.
 
 Register the bundle in `config/bundles.php`:
 
@@ -80,7 +82,7 @@ Inject `CheckoutService` and `MerchantContext` in an authorized application serv
 use Lunixi\Sdk\Commerce\{CheckoutService, Money, OrderSnapshot};
 use Lunixi\Symfony\MerchantContext;
 
-$order = new OrderSnapshot($merchant->merchantId(), 'order-1001', Money::minor('100.50'), 'TRY');
+$order = new OrderSnapshot($merchant->merchantId(), 'order-1001', Money::minor('100.50', 2), 'TRY');
 $session = $checkout->start('order-1001', $order, 'https://shop.example/payment/return');
 // Render browserConfig() with the official checkout bundle on the owned merchant page.
 ```
@@ -108,7 +110,7 @@ Repeated events skip application; changed content under the same event ID is rej
 Protect native admin actions with permission and CSRF checks, and persist a stable native operation ID before calling:
 
 ```php
-$checkout->mutate($orderKey, 'refund:1001:1', 'refund', 5000, $applyNativeOrder);
+$checkout->mutate($orderKey, 'refund:1001:1', 'refund', '5000', $applyNativeOrder);
 $status = $checkout->operationStatus($orderKey, 'refund:1001:1');
 ```
 
