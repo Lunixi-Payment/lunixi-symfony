@@ -8,6 +8,9 @@ use Lunixi\Sdk\Auth\InMemoryTokenStore;
 use Lunixi\Sdk\Commerce\CheckoutService;
 use Lunixi\Sdk\Commerce\OrderSnapshot;
 use Lunixi\Sdk\Exception\WebhookVerificationException;
+use Lunixi\Sdk\Payment\Address;
+use Lunixi\Sdk\Payment\BasketItem;
+use Lunixi\Sdk\Payment\Buyer;
 use Lunixi\Symfony\CacheTokenStore;
 use Lunixi\Symfony\ClientFactory;
 use Lunixi\Symfony\DoctrineLedgerStore;
@@ -38,7 +41,10 @@ final class BundleTest extends TestCase
         self::assertInstanceOf(CheckoutService::class, $checkout);
         self::assertInstanceOf(Connection::class, $db);
         $http->respond(['data' => ['paymentId' => 'pi-1', 'token' => 'synthetic-token', 'paymentPageUrl' => 'https://pay.lunixi.com/payment/separate-backend-page-token']]);
-        $order = new OrderSnapshot('merchant-1', 'order-1', '1000', 'TRY');
+        $order = (new OrderSnapshot('merchant-1', 'order-1', '1000', 'TRY'))
+            ->withBuyer(new Buyer(['name' => 'Ada', 'surname' => 'Yilmaz', 'identityNumber' => '11111111111', 'email' => 'ada@example.com', 'gsmNumber' => '+905350000000', 'city' => 'Istanbul', 'country' => 'Turkey', 'zipCode' => '34000']))
+            ->withBillingAddress(new Address(['contactName' => 'Ada Yilmaz', 'address' => 'Example Street 1', 'city' => 'Istanbul', 'country' => 'Turkey', 'zipCode' => '34000']))
+            ->withBasketItems([new BasketItem(['id' => 'SKU-1', 'name' => 'Gift card', 'category1' => 'Digital', 'itemType' => BasketItem::TYPE_VIRTUAL, 'price' => '1000'])]);
         $one = $checkout->start('order-1', $order, 'https://shop.example/return', true);
         self::assertSame('https://pay.lunixi.com/payment/separate-backend-page-token', $one->hostedUrl());
         self::assertSame('pi-1', $checkout->start('order-1', $order, 'https://shop.example/return', true)->paymentId);

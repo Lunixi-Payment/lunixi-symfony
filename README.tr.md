@@ -6,18 +6,18 @@
 
 Mevcut PHP SDK’yı Symfony servislerine bağlar; isteğe bağlı kalıcı ödeme akışını siparişlerle aynı Doctrine bağlantısında çalıştırır. Rotalar, müşteri yetkisi, CSRF, sipariş/stok/fatura politikaları uygulamanıza aittir. Paket kendiliğinden herkese açık bir ödeme rotası oluşturmaz.
 
-PHP8.1+, desteklenen Symfony6.4/7.4/8.1 ve PHP SDK ^1.0.1 gerekir. Yerelde Symfony8.1.10, DBAL4.5.0, PHP8.4, SQLite ve MariaDB doğrulandı. PostgreSQL yolu aynı DBAL sözleşmesini kullanır; yerel PostgreSQL kabulü çalıştırılmadı. [Doğrulama kaydı](docs/VERIFICATION.md) gerçek kapsamı açıklar.
+PHP8.1+, desteklenen Symfony6.4/7.4/8.1 ve PHP SDK ^2.0.1 gerekir. Yerelde Symfony8.1.10, DBAL4.5.0, PHP8.4, SQLite ve MariaDB doğrulandı. PostgreSQL yolu aynı DBAL sözleşmesini kullanır; yerel PostgreSQL kabulü çalıştırılmadı. [Doğrulama kaydı](docs/VERIFICATION.md) gerçek kapsamı açıklar.
 
 ## Kurulum
 
-[1.0.0 sürümü](https://packagist.org/packages/lunixi/symfony-bundle) ve [PHP SDK 1.0.1 bağımlılığı](https://packagist.org/packages/lunixi/php-sdk) Packagist üzerinde yayımlandı; aşağıdaki komutla kurun. Kanonik string para sözleşmesi için [geçiş rehberini](MIGRATION-1.0.md) uygulayın:
+[2.0.0 sürümü](https://packagist.org/packages/lunixi/symfony-bundle) ve [PHP SDK 2.0.1 bağımlılığı](https://packagist.org/packages/lunixi/php-sdk) Packagist üzerinde yayımlandı; aşağıdaki komutla kurun. Kanonik string para sözleşmesi için [geçiş rehberini](MIGRATION-1.0.md) uygulayın:
 
 ```sh
-composer require "lunixi/symfony-bundle:^1.0"
+composer require "lunixi/symfony-bundle:^2.0"
 ```
 
 Composer yayımlanmış PHP SDK bağımlılığını çözer; normal kurulum VCS tanımı veya
-yerel SDK kaynağı gerektirmez. İnceleme için [v1.0.0 kaynak etiketi](https://github.com/Lunixi-Payment/lunixi-symfony/tree/v1.0.0) kullanılabilir.
+yerel SDK kaynağı gerektirmez. İnceleme için [v2.0.0 kaynak etiketi](https://github.com/Lunixi-Payment/lunixi-symfony/tree/v2.0.0) kullanılabilir.
 
 `config/bundles.php` içine `Lunixi\Symfony\LunixiBundle::class => ['all' => true]` ekleyin. `config/packages/lunixi.yaml`:
 
@@ -40,13 +40,25 @@ Dağıtım sırasında `php bin/console lunixi:ledger:install` çalıştırın. 
 
 ## Ödeme ve bildirim
 
-`LunixiClient` PHP SDK’nın tüm belgelenmiş servislerini sunar. `CheckoutService`, `MerchantContext`, `DoctrineLedgerStore` ve `CacheTokenStore` otomatik bağlanabilir. Müşteri yetkisini kontrol edip tutarı kendi veritabanınızdan okuyun:
+`LunixiClient` PHP SDK’nın tüm belgelenmiş servislerini sunar. `CheckoutService`, `MerchantContext`, `DoctrineLedgerStore` ve `CacheTokenStore` otomatik bağlanabilir. Müşteri yetkisini kontrol edip tutarı kendi veritabanınızdan okuyun. Her ödeme sipariş bilgilerini taşır: alıcı, fatura adresi ve en az bir sepet kalemi (`PHYSICAL` kalemde teslimat adresi de). Kalem fiyatlarının toplamı tutara eşittir. Eksik siparişte `start()`, deneme ayrılmadan `ConfigurationException` atar. `buyer.ip` gönderilmeyebilir; Lunixi formu alıcının tarayıcısından alır.
 
 ```php
-$order = new Lunixi\Sdk\Commerce\OrderSnapshot(
+use Lunixi\Sdk\Payment\{Address, BasketItem, Buyer};
+
+$order = (new Lunixi\Sdk\Commerce\OrderSnapshot(
     $merchant->merchantId(), 'order-1001',
     Lunixi\Sdk\Commerce\Money::minor('100.50', 2), 'TRY'
-);
+))
+    ->withBuyer(new Buyer([
+        'name' => 'Ada', 'surname' => 'Yilmaz', 'identityNumber' => '11111111111', 'email' => 'ada@example.com',
+        'gsmNumber' => '+905350000000', 'city' => 'Istanbul', 'country' => 'Turkey', 'zipCode' => '34000',
+    ]))
+    ->withBillingAddress(new Address([
+        'contactName' => 'Ada Yilmaz', 'address' => 'Example Street 1', 'city' => 'Istanbul', 'country' => 'Turkey', 'zipCode' => '34000',
+    ]))
+    ->withBasketItems([new BasketItem([
+        'id' => 'SKU-1', 'name' => 'Gift card', 'category1' => 'Digital', 'itemType' => BasketItem::TYPE_VIRTUAL, 'price' => '10050',
+    ])]);
 $session = $checkout->start('order-1001', $order, 'https://shop.example/payment/return');
 ```
 

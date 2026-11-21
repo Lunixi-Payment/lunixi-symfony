@@ -1,5 +1,10 @@
 # Changelog
 
+## 2.0.0 — 2026-11-21
+
+- **Breaking:** requires PHP SDK ^2.0.1. Payment requests require the order details (buyer, billing address, at least one basket item; shipping address for a `PHYSICAL` item): `CheckoutService::start()` refuses an `OrderSnapshot` without them (`withBuyer()`, `withBillingAddress()`, `withShippingAddress()`, `withBasketItems()`) before reserving the attempt. The README examples pass them. See the PHP SDK 2.0.0 changelog.
+- Docs: Para Transferi (`BANK_TRANSFER`) waits until the transfer deadline; `payment.bank_transfer.*` events do not change the payment status; exceptions are handled with the PHP SDK's `PaymentClient`. No code change.
+
 ## 1.0.0 — 2026-11-01
 
 - Breaking: monetary minor units are canonical integer strings in requests, responses and platform settlement records. Numeric money is rejected; counts, rates and quantities retain their existing types.

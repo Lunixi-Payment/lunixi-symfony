@@ -8,18 +8,18 @@
 
 Inject the existing Lunixi PHP SDK into Symfony, or enable its durable checkout workflow on the same Doctrine connection as your orders. The bundle registers services and a schema command; your application owns routes, authentication, order permissions and fulfillment. No public payment endpoint is silently installed.
 
-Requires PHP 8.1+, a supported Symfony 6.4/7.4/8.1 release and PHP SDK ^1.0.1. Commerce needs a transactional Doctrine DBAL connection: MySQL/InnoDB, PostgreSQL or SQLite. The application must use the same connection for its order changes. Native local verification used Symfony 8.1.10, DBAL 4.5.0, PHP 8.4, SQLite and MariaDB; see [verification](docs/VERIFICATION.md).
+Requires PHP 8.1+, a supported Symfony 6.4/7.4/8.1 release and PHP SDK ^2.0.1. Commerce needs a transactional Doctrine DBAL connection: MySQL/InnoDB, PostgreSQL or SQLite. The application must use the same connection for its order changes. Native local verification used Symfony 8.1.10, DBAL 4.5.0, PHP 8.4, SQLite and MariaDB; see [verification](docs/VERIFICATION.md).
 
 ## Install
 
-Install published version **1.0.0** from [Packagist](https://packagist.org/packages/lunixi/symfony-bundle); its [PHP SDK 1.0.1 dependency](https://packagist.org/packages/lunixi/php-sdk) is also published:
+Install published version **2.0.0** from [Packagist](https://packagist.org/packages/lunixi/symfony-bundle); its [PHP SDK 2.0.1 dependency](https://packagist.org/packages/lunixi/php-sdk) is also published:
 
 ```sh
-composer require "lunixi/symfony-bundle:^1.0"
+composer require "lunixi/symfony-bundle:^2.0"
 ```
 
 Composer resolves the published PHP SDK dependency; normal installation needs no
-VCS override or local SDK source. The corresponding [v1.0.0 source tag](https://github.com/Lunixi-Payment/lunixi-symfony/tree/v1.0.0) remains available for review.
+VCS override or local SDK source. The corresponding [v2.0.0 source tag](https://github.com/Lunixi-Payment/lunixi-symfony/tree/v2.0.0) remains available for review.
 
 Register the bundle in `config/bundles.php`:
 
@@ -78,11 +78,24 @@ It creates the attempt and event tables without deleting existing financial hist
 
 Inject `CheckoutService` and `MerchantContext` in an authorized application service. Read and lock your own server-side order; do not accept its amount, currency or ownership from browser input:
 
+Every payment carries the order details: the buyer, the billing address and at least one basket item (a `PHYSICAL` item also needs the shipping address), with item prices adding up to the amount. `start()` refuses an incomplete order with `ConfigurationException` before reserving the attempt; `buyer.ip` may be left out because the Lunixi form takes it from the buyer's browser.
+
 ```php
 use Lunixi\Sdk\Commerce\{CheckoutService, Money, OrderSnapshot};
+use Lunixi\Sdk\Payment\{Address, BasketItem, Buyer};
 use Lunixi\Symfony\MerchantContext;
 
-$order = new OrderSnapshot($merchant->merchantId(), 'order-1001', Money::minor('100.50', 2), 'TRY');
+$order = (new OrderSnapshot($merchant->merchantId(), 'order-1001', Money::minor('100.50', 2), 'TRY'))
+    ->withBuyer(new Buyer([
+        'name' => 'Ada', 'surname' => 'Yilmaz', 'identityNumber' => '11111111111', 'email' => 'ada@example.com',
+        'gsmNumber' => '+905350000000', 'city' => 'Istanbul', 'country' => 'Turkey', 'zipCode' => '34000',
+    ]))
+    ->withBillingAddress(new Address([
+        'contactName' => 'Ada Yilmaz', 'address' => 'Example Street 1', 'city' => 'Istanbul', 'country' => 'Turkey', 'zipCode' => '34000',
+    ]))
+    ->withBasketItems([new BasketItem([
+        'id' => 'SKU-1', 'name' => 'Gift card', 'category1' => 'Digital', 'itemType' => BasketItem::TYPE_VIRTUAL, 'price' => '10050',
+    ])]);
 $session = $checkout->start('order-1001', $order, 'https://shop.example/payment/return');
 // Render browserConfig() with the official checkout bundle on the owned merchant page.
 ```
@@ -102,6 +115,8 @@ $decision = $checkout->reconcile($orderKey, $applyNativeOrder, $event);
 ```
 
 The shared SDK verifies freshness and v2 HMAC, matches the persisted payment against authenticated GET, checks merchant/order/currency/amount/settlement counters and requires a complete split-parent aggregate. A browser return never marks paid. A lost create response can bind only its exact opaque reservation after authenticated recovery. The application callback runs inside the DBAL transaction; lock and compare the current native order against its original snapshot, retain fraud/manual holds, and make invoice/stock transitions idempotent by payment ID. Queue notifications in a transactional outbox; send them after commit. Return 2xx only after commit. Database, signature and uncertain-provider failures must not be acknowledged as paid.
+
+A Para Transferi (`BANK_TRANSFER`, havale / EFT / FAST) payment stays `PROCESSING` until the buyer's transfer reaches your bank account, up to the end of its deadline (1–3 business days after the payment opened, your setting); keep the order waiting that long instead of cancelling it after a short timeout. The result is `payment.captured`, or `payment.failed` when the deadline passes without the money. `payment.bank_transfer.*` events (`Lunixi\Sdk\Payment\BankTransferEvents`) report partial, short, excess or late transfers and do not change the payment status; an accepted late transfer opens a new captured payment for the same order (`acceptedPaymentId`). The PHP SDK's `PaymentClient` (`listBankTransferExceptions()`, `acceptBankTransferException()`, `markBankTransferExceptionRefunded()`) handles the exceptions.
 
 Repeated events skip application; changed content under the same event ID is rejected. Failed native writes roll the receipt back, so redelivery can succeed. Schedule authenticated reconciliation for pending/review attempts. Avoid logging credentials, tokens, headers, raw webhooks or buyer data.
 
